@@ -3,6 +3,7 @@ package com.api.vendacerta.controllers;
 import com.api.vendacerta.dtos.ProdutoRequestDTO;
 import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.services.ProdutoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> cadastrar(@RequestBody ProdutoRequestDTO produtoRequestDTO) {
+    public ResponseEntity<Produto> cadastrar(@Valid @RequestBody ProdutoRequestDTO produtoRequestDTO) {
         Produto produtoSalvo = produtoService.cadastrarProduto(produtoRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
     }
