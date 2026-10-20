@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/produtos")
 public class ProdutoController {
@@ -22,5 +25,17 @@ public class ProdutoController {
     public ResponseEntity<Produto> cadastrar(@Valid @RequestBody ProdutoRequestDTO produtoRequestDTO) {
         Produto produtoSalvo = produtoService.cadastrarProduto(produtoRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoSalvo);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Produto>> listar() {
+        List<Produto> produtos = produtoService.listarTodosProdutos();
+        return ResponseEntity.ok(produtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
+        Produto produto = produtoService.listarProdutosPorID(id);
+        return ResponseEntity.ok(produto);
     }
 }
