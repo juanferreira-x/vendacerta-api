@@ -5,6 +5,9 @@ import com.api.vendacerta.dtos.ProdutoRequestDTO;
 import com.api.vendacerta.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class ProdutoService {
 
@@ -23,5 +26,14 @@ public class ProdutoService {
     produto.setQuantidadeEstoque(dto.quantidadeEstoque());
 
         return produtoRepository.save(produto);
+    }
+
+    public List<Produto> listarTodosProdutos(){
+        return produtoRepository.findAll();
+    }
+
+    public Produto listarProdutosPorID(Long id){
+        return produtoRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Produto não encontrado no banco de dados."));
     }
 }
