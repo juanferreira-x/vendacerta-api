@@ -2,6 +2,7 @@ package com.api.vendacerta.services;
 
 import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.dtos.ProdutoRequestDTO;
+import com.api.vendacerta.exceptions.ResourceNotFoundException;
 import com.api.vendacerta.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,6 @@ public class ProdutoService {
 
     public Produto listarProdutosPorID(Long id){
         return produtoRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Produto não encontrado no banco de dados."));
+        .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id + "."));
     }
 }
