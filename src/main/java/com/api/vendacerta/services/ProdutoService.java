@@ -33,7 +33,7 @@ public class ProdutoService {
         return produtoRepository.findAll();
     }
 
-    public Produto listarProdutosPorID(Long id){
+    public Produto buscarProdutosPorID(Long id){
         return produtoRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id + "."));
     }
