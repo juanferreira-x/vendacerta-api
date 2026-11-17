@@ -5,6 +5,6 @@ import jakarta.validation.constraints.Positive;
 
 public record ItemVendaRequestDTO(
         @NotNull Long produtoId,
-        @NotNull @Positive int quantidade
+        @NotNull @Positive Integer quantidade
 ) {
 }
