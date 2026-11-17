@@ -2,6 +2,7 @@ package com.api.vendacerta.services;
 
 import com.api.vendacerta.dtos.ItemVendaRequestDTO;
 import com.api.vendacerta.dtos.VendaRequestDTO;
+import com.api.vendacerta.dtos.VendaResponseDTO;
 import com.api.vendacerta.entities.ItemVenda;
 import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.entities.Venda;
@@ -25,7 +26,7 @@ public class VendaService {
     }
 
     @Transactional
-    public Venda realizarVenda(VendaRequestDTO dto) {
+    public VendaResponseDTO realizarVenda(VendaRequestDTO dto) {
         Venda venda = new Venda();
         BigDecimal valorTotal = new BigDecimal("0.00");
 
@@ -35,7 +36,7 @@ public class VendaService {
 
 
             if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {
-                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + " Disponível: " + produto.getQuantidadeEstoque() + " Solicitado: " + itemDTO.quantidade());
+                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + " | Disponível: " + produto.getQuantidadeEstoque() + " | Solicitado: " + itemDTO.quantidade());
             }
 
             produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
@@ -53,6 +54,7 @@ public class VendaService {
         }
         venda.setTotal(valorTotal);
 
-        return vendaRepository.save(venda);
+        Venda vendaSalva = vendaRepository.save(venda);
+        return VendaResponseDTO.fromEntity(vendaSalva);
     }
 }
