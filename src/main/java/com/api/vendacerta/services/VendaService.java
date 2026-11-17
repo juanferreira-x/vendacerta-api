@@ -35,7 +35,7 @@ public class VendaService {
 
 
             if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {
-                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + "Disónível:" + produto.getQuantidadeEstoque() + "Solicitado: " + itemDTO.quantidade());
+                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + " Disponível: " + produto.getQuantidadeEstoque() + " Solicitado: " + itemDTO.quantidade());
             }
 
             produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
