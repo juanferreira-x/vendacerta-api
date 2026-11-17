@@ -7,10 +7,12 @@ import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.entities.Venda;
 import com.api.vendacerta.repositories.ProdutoRepository;
 import com.api.vendacerta.repositories.VendaRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@Service
 public class VendaService {
 
     private final VendaRepository vendaRepository;
