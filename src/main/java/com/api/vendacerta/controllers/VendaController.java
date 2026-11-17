@@ -1,7 +1,7 @@
 package com.api.vendacerta.controllers;
 
 import com.api.vendacerta.dtos.VendaRequestDTO;
-import com.api.vendacerta.entities.Venda;
+import com.api.vendacerta.dtos.VendaResponseDTO;
 import com.api.vendacerta.services.VendaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ public class VendaController {
     }
 
     @PostMapping
-    public ResponseEntity<Venda> realizarVenda(@Valid @RequestBody VendaRequestDTO dto) {
-        Venda vendaSalva = vendaService.realizarVenda(dto);
+    public ResponseEntity<VendaResponseDTO> realizarVenda(@Valid @RequestBody VendaRequestDTO dto) {
+        VendaResponseDTO vendaSalva = vendaService.realizarVenda(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(vendaSalva);
     }
 }

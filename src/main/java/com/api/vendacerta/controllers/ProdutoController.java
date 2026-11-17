@@ -35,7 +35,7 @@ public class ProdutoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        Produto produto = produtoService.listarProdutosPorID(id);
+        Produto produto = produtoService.buscarProdutosPorID(id);
         return ResponseEntity.ok(produto);
     }
 }
