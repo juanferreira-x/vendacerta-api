@@ -5,6 +5,7 @@ import com.api.vendacerta.dtos.VendaRequestDTO;
 import com.api.vendacerta.entities.ItemVenda;
 import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.entities.Venda;
+import com.api.vendacerta.exceptions.EstoqueInsuficienteException;
 import com.api.vendacerta.repositories.ProdutoRepository;
 import com.api.vendacerta.repositories.VendaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class VendaService {
 
 
             if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome());
+                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + "Disónível:" + produto.getQuantidadeEstoque() + "Solicitado: " + itemDTO.quantidade());
             }
 
             produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
