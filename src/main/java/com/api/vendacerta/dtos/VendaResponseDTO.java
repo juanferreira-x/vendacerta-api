@@ -12,17 +12,16 @@ public record VendaResponseDTO(
         LocalDateTime dataVenda,
         BigDecimal total,
         List<ItemVendaResponseDTO> itens
-        )
-    {
-        public static VendaResponseDTO fromEntity(Venda venda){
+) {
+    public static VendaResponseDTO fromEntity(Venda venda) {
 
-            return new VendaResponseDTO(
-            venda.getId(),
-            venda.getDataVenda(),
-            venda.getTotal(),
-            venda.getItens().stream()
-                    .map(ItemVendaResponseDTO::fromEntity)
-                    .toList()
-            );
-        }
+        return new VendaResponseDTO(
+                venda.getId(),
+                venda.getDataVenda(),
+                venda.getTotal(),
+                venda.getItens().stream()
+                        .map(ItemVendaResponseDTO::fromEntity)
+                        .toList()
+        );
+    }
 }

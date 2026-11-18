@@ -14,7 +14,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String,Object>> handlerResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handlerResourceNotFound(ResourceNotFoundException ex) {
 
         Map<String, Object> erro = new HashMap<>();
         erro.put("timestamp", LocalDateTime.now());

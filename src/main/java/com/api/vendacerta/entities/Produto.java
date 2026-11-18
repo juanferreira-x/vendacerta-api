@@ -6,7 +6,7 @@ import org.hibernate.annotations.Audited;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name= "tb_produtos")
+@Table(name = "tb_produtos")
 public class Produto {
 
     @Id
@@ -27,11 +27,11 @@ public class Produto {
         return id;
     }
 
-    public String getNome(){
+    public String getNome() {
         return nome;
     }
 
-    public void setNome(String nome){
+    public void setNome(String nome) {
         this.nome = nome;
     }
 
