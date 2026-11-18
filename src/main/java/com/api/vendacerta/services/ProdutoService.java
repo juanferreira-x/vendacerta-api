@@ -1,5 +1,6 @@
 package com.api.vendacerta.services;
 
+import com.api.vendacerta.dtos.ProdutoResponseDTO;
 import com.api.vendacerta.entities.Produto;
 import com.api.vendacerta.dtos.ProdutoRequestDTO;
 import com.api.vendacerta.exceptions.ResourceNotFoundException;
@@ -7,7 +8,6 @@ import com.api.vendacerta.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProdutoService {
@@ -18,23 +18,30 @@ public class ProdutoService {
         this.produtoRepository = produtoRepository;
     }
 
-    public Produto cadastrarProduto(ProdutoRequestDTO dto){
+    public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
 
-    Produto produto = new Produto();
+        Produto produto = new Produto();
 
-    produto.setNome(dto.nome());
-    produto.setPreco(dto.preco());
-    produto.setQuantidadeEstoque(dto.quantidadeEstoque());
+        produto.setNome(dto.nome());
+        produto.setPreco(dto.preco());
+        produto.setQuantidadeEstoque(dto.quantidadeEstoque());
 
-        return produtoRepository.save(produto);
+        Produto produtoSalvo = produtoRepository.save(produto);
+        return ProdutoResponseDTO.fromEntity(produtoSalvo);
     }
 
-    public List<Produto> listarProdutos(){
-        return produtoRepository.findAll();
+    public List<ProdutoResponseDTO> listarProdutos() {
+        List<Produto> produtos = produtoRepository.findAll();
+        return produtos.stream().map(ProdutoResponseDTO::fromEntity).toList();
     }
 
-    public Produto buscarProdutosPorID(Long id){
-        return produtoRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id + "."));
+    public Produto buscarEntidadePorId(Long id) {
+        return produtoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id + "."));
+    }
+
+    public ProdutoResponseDTO buscarPorId(Long id) {
+        Produto produto = buscarEntidadePorId(id);
+        return ProdutoResponseDTO.fromEntity(produto);
+
     }
 }

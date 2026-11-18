@@ -32,7 +32,7 @@ public class VendaService {
 
 
         for (ItemVendaRequestDTO itemDTO : dto.itens()) {
-            Produto produto = produtoService.buscarProdutosPorID(itemDTO.produtoId());
+            Produto produto = produtoService.buscarEntidadePorId(itemDTO.produtoId());
 
 
             if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {

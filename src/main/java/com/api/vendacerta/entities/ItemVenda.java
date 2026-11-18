@@ -1,11 +1,12 @@
 package com.api.vendacerta.entities;
+
 import com.api.vendacerta.entities.Venda;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="tb_item_vendas")
+@Table(name = "tb_item_vendas")
 public class ItemVenda {
 
     @Id
