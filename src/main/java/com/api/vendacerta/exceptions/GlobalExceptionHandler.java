@@ -1,40 +1,35 @@
 package com.api.vendacerta.exceptions;
 
-import com.api.vendacerta.entities.Produto;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import java.time.Instant;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handlerResourceNotFound(ResourceNotFoundException ex) {
+    public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 
-        Map<String, Object> erro = new HashMap<>();
-        erro.put("timestamp", LocalDateTime.now());
-        erro.put("status", HttpStatus.NOT_FOUND.value());
-        erro.put("erro", "Recurso não encontrado");
-        erro.put("message", ex.getMessage());
+        problema.setTitle("Recurso não encontrado");
+        problema.setProperty("timestamp", Instant.now());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+        return problema;
+
     }
 
 
     @ExceptionHandler(EstoqueInsuficienteException.class)
-    public ResponseEntity<Map<String, Object>> handlerEstoqueInsuficiente(EstoqueInsuficienteException ex) {
+    public ProblemDetail handleEstoqueInsuficiente(EstoqueInsuficienteException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
 
-        Map<String, Object> erro = new HashMap<>();
-        erro.put("timestamp", LocalDateTime.now());
-        erro.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
-        erro.put("erro", "Estoque insuficiente");
-        erro.put("message", ex.getMessage());
+        problema.setTitle("Estoque insuficiente");
+        problema.setProperty("timestamp", Instant.now());
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(erro);
+        return problema;
     }
 }
