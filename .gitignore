@@ -31,3 +31,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Configuracao local e segredos (equivalente ao .env do Laravel) ###
+.env
+.env.*
+!.env.example
+application-local.yaml
+application-local.properties
+
+### Logs ###
+*.log
+logs/
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
