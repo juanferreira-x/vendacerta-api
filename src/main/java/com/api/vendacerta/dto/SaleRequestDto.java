@@ -1,10 +1,17 @@
-package com.api.vendacerta.dtos;
+package com.api.vendacerta.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
-public record VendaRequestDTO(
-        @NotEmpty(message = "A venda deve ter pelo menos um item") List<@Valid ItemVendaRequestDTO> itens) {
+/**
+ * Corpo da requisição para criar uma venda.
+ * O {@code List<@Valid ...>} faz a validação descer para cada item; sem ele,
+ * as validações dos itens seriam ignoradas.
+ */
+public record SaleRequestDto(
+        @NotEmpty(message = "{sale.items.not-empty}")
+        List<@Valid SaleItemRequestDto> items
+) {
 }

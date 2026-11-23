@@ -1,26 +1,31 @@
-package com.api.vendacerta.dtos;
+package com.api.vendacerta.dto;
 
-import com.api.vendacerta.entities.ItemVenda;
-import com.api.vendacerta.entities.Venda;
+import com.api.vendacerta.entity.Sale;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
-public record VendaResponseDTO(
+/**
+ * Representação pública de uma venda concluída.
+ */
+public record SaleResponseDto(
         Long id,
-        LocalDateTime dataVenda,
+        Instant createdAt,
         BigDecimal total,
-        List<ItemVendaResponseDTO> itens
+        List<SaleItemResponseDto> items
 ) {
-    public static VendaResponseDTO fromEntity(Venda venda) {
 
-        return new VendaResponseDTO(
-                venda.getId(),
-                venda.getDataVenda(),
-                venda.getTotal(),
-                venda.getItens().stream()
-                        .map(ItemVendaResponseDTO::fromEntity)
+    /**
+     * Deve ser chamado dentro da transação: {@code items} é carregado sob demanda (lazy).
+     */
+    public static SaleResponseDto fromEntity(Sale sale) {
+        return new SaleResponseDto(
+                sale.getId(),
+                sale.getCreatedAt(),
+                sale.getTotal(),
+                sale.getItems().stream()
+                        .map(SaleItemResponseDto::fromEntity)
                         .toList()
         );
     }

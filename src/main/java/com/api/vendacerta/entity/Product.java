@@ -1,55 +1,62 @@
-package com.api.vendacerta.entities;
+package com.api.vendacerta.entity;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.Audited;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
+/**
+ * Produto disponível para venda. Mapeado para a tabela {@code products}.
+ *
+ * <p>Modelo interno: nunca atravessa a fronteira HTTP. Os clientes recebem
+ * {@link com.api.vendacerta.dto.ProductResponseDto} no lugar.</p>
+ */
 @Entity
-@Table(name = "tb_produtos")
-public class Produto {
+@Table(name = "products")
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
+    @Column(nullable = false)
+    private String name;
 
-    private BigDecimal preco;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 
-    private int quantidadeEstoque;
-
-
-    public Produto() {
-    }
+    @Column(nullable = false)
+    private int stockQuantity;
 
     public Long getId() {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public BigDecimal getPreco() {
-        return preco;
+    public BigDecimal getPrice() {
+        return price;
     }
 
-    public void setPreco(BigDecimal preco) {
-        this.preco = preco;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
-    public int getQuantidadeEstoque() {
-        return quantidadeEstoque;
+    public int getStockQuantity() {
+        return stockQuantity;
     }
 
-    public void setQuantidadeEstoque(int quantidadeEstoque) {
-        this.quantidadeEstoque = quantidadeEstoque;
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
-
 }
-

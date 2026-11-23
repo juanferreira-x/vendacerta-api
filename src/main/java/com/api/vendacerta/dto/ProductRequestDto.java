@@ -1,4 +1,4 @@
-package com.api.vendacerta.dtos;
+package com.api.vendacerta.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -6,15 +6,20 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 
-public record ProdutoRequestDTO(
-        @NotBlank(message = "O nome do produto não pode ser vazio!")
-        String nome,
+/**
+ * Corpo da requisição para criar um produto.
+ * As mensagens de validação são chaves do {@code messages.properties}.
+ */
+public record ProductRequestDto(
+        @NotBlank(message = "{product.name.not-blank}")
+        String name,
 
-        @NotNull(message = "O preço é obrigatório!")
-        @PositiveOrZero(message = "O preço não pode ser negativo!")
-        BigDecimal preco,
+        @NotNull(message = "{product.price.not-null}")
+        @PositiveOrZero(message = "{product.price.positive-or-zero}")
+        BigDecimal price,
 
-        @NotNull(message = "A quantidade em estoque é obrigatória!")
-        @PositiveOrZero(message = "A quantidade em estoque não pode ser negativa!")
-        Integer quantidadeEstoque) {
+        @NotNull(message = "{product.stock-quantity.not-null}")
+        @PositiveOrZero(message = "{product.stock-quantity.positive-or-zero}")
+        Integer stockQuantity
+) {
 }

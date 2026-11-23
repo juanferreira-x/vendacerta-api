@@ -1,67 +1,82 @@
-package com.api.vendacerta.entities;
+package com.api.vendacerta.entity;
 
-import com.api.vendacerta.entities.Venda;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
+/**
+ * Uma linha da venda: qual produto, quantas unidades e por qual preço.
+ * Mapeado para a tabela {@code sale_items}.
+ *
+ * <p>O {@code unitPrice} é um retrato histórico copiado do produto no momento da venda:
+ * mudanças futuras de preço nunca alteram vendas passadas.</p>
+ */
 @Entity
-@Table(name = "tb_item_vendas")
-public class ItemVenda {
+@Table(name = "sale_items")
+public class SaleItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int quantidade;
+    @Column(nullable = false)
+    private int quantity;
 
-    private BigDecimal precoUnitario;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal unitPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "venda_id")
-    private Venda venda;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "sale_id")
+    private Sale sale;
 
-    @ManyToOne
-    @JoinColumn(name = "produto_id")
-    private Produto produto;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
+    protected SaleItem() {
+    }
 
-    public ItemVenda() {
+    /**
+     * Cria o item congelando o preço atual do produto como preço unitário.
+     */
+    public SaleItem(Product product, int quantity) {
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = product.getPrice();
+    }
+
+    public BigDecimal getSubtotal() {
+        return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     public Long getId() {
         return id;
     }
 
-    public int getQuantidade() {
-        return quantidade;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
     }
 
-    public BigDecimal getPrecoUnitario() {
-        return precoUnitario;
+    public Sale getSale() {
+        return sale;
     }
 
-    public void setPrecoUnitario(BigDecimal precoUnitario) {
-        this.precoUnitario = precoUnitario;
+    void setSale(Sale sale) {
+        this.sale = sale;
     }
 
-    public Venda getVenda() {
-        return venda;
-    }
-
-    public void setVenda(Venda venda) {
-        this.venda = venda;
-    }
-
-    public Produto getProduto() {
-        return produto;
-    }
-
-    public void setProduto(Produto produto) {
-        this.produto = produto;
+    public Product getProduct() {
+        return product;
     }
 }

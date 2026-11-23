@@ -1,60 +1,57 @@
-package com.api.vendacerta.services;
+package com.api.vendacerta.service;
 
-import com.api.vendacerta.dtos.ItemVendaRequestDTO;
-import com.api.vendacerta.dtos.VendaRequestDTO;
-import com.api.vendacerta.dtos.VendaResponseDTO;
-import com.api.vendacerta.entities.ItemVenda;
-import com.api.vendacerta.entities.Produto;
-import com.api.vendacerta.entities.Venda;
-import com.api.vendacerta.exceptions.EstoqueInsuficienteException;
-import com.api.vendacerta.repositories.ProdutoRepository;
-import com.api.vendacerta.repositories.VendaRepository;
-import org.springframework.transaction.annotation.Transactional;
+import com.api.vendacerta.dto.SaleItemRequestDto;
+import com.api.vendacerta.dto.SaleRequestDto;
+import com.api.vendacerta.dto.SaleResponseDto;
+import com.api.vendacerta.entity.Product;
+import com.api.vendacerta.entity.Sale;
+import com.api.vendacerta.entity.SaleItem;
+import com.api.vendacerta.exception.InsufficientStockException;
+import com.api.vendacerta.repository.SaleRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
+/**
+ * Regras de negócio de vendas.
+ */
 @Service
-public class VendaService {
+public class SaleService {
 
-    private final VendaRepository vendaRepository;
-    private final ProdutoService produtoService;
+    private final SaleRepository saleRepository;
+    private final ProductService productService;
 
-    public VendaService(VendaRepository vendaRepository, ProdutoService produtoService) {
-        this.vendaRepository = vendaRepository;
-        this.produtoService = produtoService;
+    public SaleService(SaleRepository saleRepository, ProductService productService) {
+        this.saleRepository = saleRepository;
+        this.productService = productService;
     }
 
+    /**
+     * Cria uma venda, abatendo o estoque de cada produto vendido.
+     *
+     * <p>Roda numa única transação: se qualquer item falhar (produto inexistente ou estoque
+     * insuficiente), tudo é desfeito e nenhum estoque muda. O estoque abatido é salvo pelo
+     * dirty checking, já que os produtos são entidades gerenciadas pelo JPA.</p>
+     *
+     * @throws com.api.vendacerta.exception.ResourceNotFoundException se um produto não existir
+     * @throws InsufficientStockException se um produto tiver menos unidades que o pedido
+     */
     @Transactional
-    public VendaResponseDTO realizarVenda(VendaRequestDTO dto) {
-        Venda venda = new Venda();
-        BigDecimal valorTotal = new BigDecimal("0.00");
+    public SaleResponseDto create(SaleRequestDto request) {
+        Sale sale = new Sale();
 
+        for (SaleItemRequestDto itemRequest : request.items()) {
+            Product product = productService.findEntityById(itemRequest.productId());
+            int requestedQuantity = itemRequest.quantity();
 
-        for (ItemVendaRequestDTO itemDTO : dto.itens()) {
-            Produto produto = produtoService.buscarEntidadePorId(itemDTO.produtoId());
-
-
-            if (produto.getQuantidadeEstoque() < itemDTO.quantidade()) {
-                throw new EstoqueInsuficienteException("Estoque insuficiente para o produto: " + produto.getNome() + " | Disponível: " + produto.getQuantidadeEstoque() + " | Solicitado: " + itemDTO.quantidade());
+            if (product.getStockQuantity() < requestedQuantity) {
+                throw new InsufficientStockException(product.getName(), product.getStockQuantity(), requestedQuantity);
             }
 
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDTO.quantidade());
-
-            ItemVenda itemVenda = new ItemVenda();
-            itemVenda.setProduto(produto);
-            itemVenda.setQuantidade(itemDTO.quantidade());
-            itemVenda.setPrecoUnitario(produto.getPreco());
-            itemVenda.setVenda(venda);
-
-            BigDecimal subtotal = produto.getPreco().multiply(new BigDecimal(itemDTO.quantidade()));
-            valorTotal = valorTotal.add(subtotal);
-
-            venda.getItens().add(itemVenda);
+            product.setStockQuantity(product.getStockQuantity() - requestedQuantity);
+            sale.addItem(new SaleItem(product, requestedQuantity));
         }
-        venda.setTotal(valorTotal);
 
-        Venda vendaSalva = vendaRepository.save(venda);
-        return VendaResponseDTO.fromEntity(vendaSalva);
+        Sale savedSale = saleRepository.save(sale);
+        return SaleResponseDto.fromEntity(savedSale);
     }
 }

@@ -1,23 +1,25 @@
-package com.api.vendacerta.dtos;
+package com.api.vendacerta.dto;
 
-
-import com.api.vendacerta.entities.Produto;
+import com.api.vendacerta.entity.Product;
 
 import java.math.BigDecimal;
 
-public record ProdutoResponseDTO(
+/**
+ * Representação pública do produto. Desacopla o contrato da API da entidade {@link Product}.
+ */
+public record ProductResponseDto(
         Long id,
-        String nome,
-        BigDecimal preco,
-        Integer quantidadeEstoque
+        String name,
+        BigDecimal price,
+        Integer stockQuantity
 ) {
-    public static ProdutoResponseDTO fromEntity(Produto produto) {
 
-        return new ProdutoResponseDTO(
-                produto.getId(),
-                produto.getNome(),
-                produto.getPreco(),
-                produto.getQuantidadeEstoque()
+    public static ProductResponseDto fromEntity(Product product) {
+        return new ProductResponseDto(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStockQuantity()
         );
     }
 }

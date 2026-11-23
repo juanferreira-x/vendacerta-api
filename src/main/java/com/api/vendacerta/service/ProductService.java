@@ -1,47 +1,62 @@
-package com.api.vendacerta.services;
+package com.api.vendacerta.service;
 
-import com.api.vendacerta.dtos.ProdutoResponseDTO;
-import com.api.vendacerta.entities.Produto;
-import com.api.vendacerta.dtos.ProdutoRequestDTO;
-import com.api.vendacerta.exceptions.ResourceNotFoundException;
-import com.api.vendacerta.repositories.ProdutoRepository;
+import com.api.vendacerta.dto.ProductRequestDto;
+import com.api.vendacerta.dto.ProductResponseDto;
+import com.api.vendacerta.entity.Product;
+import com.api.vendacerta.exception.ResourceNotFoundException;
+import com.api.vendacerta.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Regras de negócio de produtos.
+ *
+ * <p>Os métodos públicos devolvem DTOs para a API; {@link #findEntityById(Long)} é o único
+ * que devolve a entidade, para uso interno de outros services.</p>
+ */
 @Service
-public class ProdutoService {
+public class ProductService {
 
-    private final ProdutoRepository produtoRepository;
+    private final ProductRepository productRepository;
 
-    public ProdutoService(ProdutoRepository produtoRepository) {
-        this.produtoRepository = produtoRepository;
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
-    public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
+    @Transactional
+    public ProductResponseDto create(ProductRequestDto request) {
+        Product product = new Product();
+        product.setName(request.name());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
 
-        Produto produto = new Produto();
-
-        produto.setNome(dto.nome());
-        produto.setPreco(dto.preco());
-        produto.setQuantidadeEstoque(dto.quantidadeEstoque());
-
-        Produto produtoSalvo = produtoRepository.save(produto);
-        return ProdutoResponseDTO.fromEntity(produtoSalvo);
+        Product savedProduct = productRepository.save(product);
+        return ProductResponseDto.fromEntity(savedProduct);
     }
 
-    public List<ProdutoResponseDTO> listarProdutos() {
-        List<Produto> produtos = produtoRepository.findAll();
-        return produtos.stream().map(ProdutoResponseDTO::fromEntity).toList();
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> findAll() {
+        return productRepository.findAll().stream()
+                .map(ProductResponseDto::fromEntity)
+                .toList();
     }
 
-    public Produto buscarEntidadePorId(Long id) {
-        return produtoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id + "."));
+    @Transactional(readOnly = true)
+    public ProductResponseDto findById(Long id) {
+        return ProductResponseDto.fromEntity(findEntityById(id));
     }
 
-    public ProdutoResponseDTO buscarPorId(Long id) {
-        Produto produto = buscarEntidadePorId(id);
-        return ProdutoResponseDTO.fromEntity(produto);
-
+    /**
+     * Uso INTERNO (ex: {@link SaleService}). Devolve a entidade gerenciada pelo JPA para que
+     * alterações como abater estoque sejam salvas automaticamente pelo dirty checking.
+     * Nunca devolva esta entidade para um controller.
+     *
+     * @throws ResourceNotFoundException se nenhum produto tiver o id informado
+     */
+    public Product findEntityById(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("product.not-found", id));
     }
 }
