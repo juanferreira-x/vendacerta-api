@@ -1,5 +1,6 @@
 package com.api.vendacerta.entity;
 
+import com.api.vendacerta.exception.InsufficientStockException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +33,27 @@ public class Product {
     @Column(nullable = false)
     private int stockQuantity;
 
+    protected Product() {
+    }
+
+    /**
+     * Cria um produto já válido: o objeto nunca existe com dados inválidos,
+     * mesmo que seja criado fora do fluxo HTTP (que já é validado pelo DTO).
+     *
+     * @throws IllegalArgumentException se o preço for nulo/negativo ou o estoque for negativo
+     */
+    public Product(String name, BigDecimal price, int stockQuantity) {
+        if (price == null || price.signum() < 0) {
+            throw new IllegalArgumentException("O preço não pode ser nulo nem negativo.");
+        }
+        if (stockQuantity < 0) {
+            throw new IllegalArgumentException("O estoque inicial não pode ser negativo.");
+        }
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+    }
+
     public Long getId() {
         return id;
     }
@@ -40,23 +62,29 @@ public class Product {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public BigDecimal getPrice() {
         return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
     }
 
     public int getStockQuantity() {
         return stockQuantity;
     }
 
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
+    /**
+     * Abate a quantidade vendida do estoque.
+     * A regra mora aqui (e não no service) para que o estoque nunca fique inválido,
+     * não importa quem chame: venda hoje, outras operações no futuro.
+     *
+     * @param quantity quantidade a abater (já validada como positiva no DTO)
+     * @throws InsufficientStockException se não houver unidades suficientes
+     */
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("A quantidade a abater deve ser positiva.");
+        }
+        if (stockQuantity < quantity) {
+            throw new InsufficientStockException(name, stockQuantity, quantity);
+        }
+        stockQuantity -= quantity;
     }
 }
