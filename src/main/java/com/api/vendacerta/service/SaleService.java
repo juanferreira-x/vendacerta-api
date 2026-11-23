@@ -33,7 +33,7 @@ public class SaleService {
      * dirty checking, já que os produtos são entidades gerenciadas pelo JPA.</p>
      *
      * @throws com.api.vendacerta.exception.ResourceNotFoundException se um produto não existir
-     * @throws InsufficientStockException se um produto tiver menos unidades que o pedido
+     * @throws InsufficientStockException                             se um produto tiver menos unidades que o pedido
      */
     @Transactional
     public SaleResponseDto create(SaleRequestDto request) {
@@ -43,11 +43,7 @@ public class SaleService {
             Product product = productService.findEntityById(itemRequest.productId());
             int requestedQuantity = itemRequest.quantity();
 
-            if (product.getStockQuantity() < requestedQuantity) {
-                throw new InsufficientStockException(product.getName(), product.getStockQuantity(), requestedQuantity);
-            }
-
-            product.setStockQuantity(product.getStockQuantity() - requestedQuantity);
+            product.decreaseStock(requestedQuantity);
             sale.addItem(new SaleItem(product, requestedQuantity));
         }
 

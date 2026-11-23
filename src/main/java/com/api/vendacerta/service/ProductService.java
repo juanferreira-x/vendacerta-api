@@ -27,10 +27,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto create(ProductRequestDto request) {
-        Product product = new Product();
-        product.setName(request.name());
-        product.setPrice(request.price());
-        product.setStockQuantity(request.stockQuantity());
+        Product product = new Product(request.name(),request.price(), request.stockQuantity());
 
         Product savedProduct = productRepository.save(product);
         return ProductResponseDto.fromEntity(savedProduct);
