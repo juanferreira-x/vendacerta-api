@@ -1,7 +1,36 @@
+# Configuração comum a todos os perfis.
+# Perfis: "dev" (padrão, H2 em memória) e "prod" (PostgreSQL, ativado por SPRING_PROFILES_ACTIVE=prod).
 spring:
   application:
     name: venda-certa-api
+  profiles:
+    default: dev
   messages:
     basename: messages
     encoding: UTF-8
     fallback-to-system-locale: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+  h2:
+    console:
+      enabled: false
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

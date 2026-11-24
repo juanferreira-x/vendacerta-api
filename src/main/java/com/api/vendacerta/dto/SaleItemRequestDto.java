@@ -11,8 +11,5 @@ public record SaleItemRequestDto(
         @NotNull(message = "{sale.item.product-id.not-null}")
         Long productId,
 
-        @NotNull(message = "{sale.item.quantity.not-null}")
-        @Positive(message = "{sale.item.quantity.positive}")
-        Integer quantity
-) {
-}
+        @NotNull(message = "{sale.item.quantity.not-null}") @Positive(message = "{sale.item.quantity.positive}")
+        Integer quantity) {}

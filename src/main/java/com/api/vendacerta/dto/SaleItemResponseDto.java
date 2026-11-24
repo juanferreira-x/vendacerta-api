@@ -1,7 +1,6 @@
 package com.api.vendacerta.dto;
 
 import com.api.vendacerta.entity.SaleItem;
-
 import java.math.BigDecimal;
 
 /**
@@ -9,12 +8,7 @@ import java.math.BigDecimal;
  * o que quebra o ciclo Sale ↔ SaleItem que causava loop infinito no JSON.
  */
 public record SaleItemResponseDto(
-        Long productId,
-        String productName,
-        Integer quantity,
-        BigDecimal unitPrice,
-        BigDecimal subtotal
-) {
+        Long productId, String productName, Integer quantity, BigDecimal unitPrice, BigDecimal subtotal) {
 
     public static SaleItemResponseDto fromEntity(SaleItem item) {
         return new SaleItemResponseDto(
@@ -22,7 +16,6 @@ public record SaleItemResponseDto(
                 item.getProduct().getName(),
                 item.getQuantity(),
                 item.getUnitPrice(),
-                item.getSubtotal()
-        );
+                item.getSubtotal());
     }
 }

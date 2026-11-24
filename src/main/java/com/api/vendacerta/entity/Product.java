@@ -7,7 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 
 /**
@@ -15,16 +15,21 @@ import java.math.BigDecimal;
  *
  * <p>Modelo interno: nunca atravessa a fronteira HTTP. Os clientes recebem
  * {@link com.api.vendacerta.dto.ProductResponseDto} no lugar.</p>
+ *
+ * <p>O campo {@code version} ativa o lock otimista: se duas vendas alterarem o mesmo produto
+ * ao mesmo tempo, a segunda é recusada em vez de sobrescrever o estoque calculado pela primeira.</p>
  */
 @Entity
 @Table(name = "products")
 public class Product {
 
+    public static final int NAME_MAX_LENGTH = 120;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = NAME_MAX_LENGTH)
     private String name;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -33,16 +38,24 @@ public class Product {
     @Column(nullable = false)
     private int stockQuantity;
 
-    protected Product() {
-    }
+    @Version
+    @Column(nullable = false)
+    private long version;
+
+    protected Product() {}
 
     /**
      * Cria um produto já válido: o objeto nunca existe com dados inválidos,
      * mesmo que seja criado fora do fluxo HTTP (que já é validado pelo DTO).
      *
-     * @throws IllegalArgumentException se o preço for nulo/negativo ou o estoque for negativo
+     * @throws IllegalArgumentException se o nome for vazio ou longo demais,
+     *                                  se o preço for nulo/negativo ou se o estoque for negativo
      */
     public Product(String name, BigDecimal price, int stockQuantity) {
+        if (name == null || name.isBlank() || name.length() > NAME_MAX_LENGTH) {
+            throw new IllegalArgumentException(
+                    "O nome é obrigatório e deve ter até " + NAME_MAX_LENGTH + " caracteres.");
+        }
         if (price == null || price.signum() < 0) {
             throw new IllegalArgumentException("O preço não pode ser nulo nem negativo.");
         }
@@ -76,7 +89,8 @@ public class Product {
      * não importa quem chame: venda hoje, outras operações no futuro.
      *
      * @param quantity quantidade a abater (já validada como positiva no DTO)
-     * @throws InsufficientStockException se não houver unidades suficientes
+     * @throws IllegalArgumentException   se a quantidade não for positiva (erro de programação)
+     * @throws InsufficientStockException se não houver unidades suficientes (regra de negócio)
      */
     public void decreaseStock(int quantity) {
         if (quantity <= 0) {

@@ -1,0 +1,13 @@
+# Perfil de produção: PostgreSQL. Nenhum segredo fica aqui: tudo vem de variáveis de ambiente
+# (veja .env.example). Sem console do H2, sem Swagger e sem dados de demonstração.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

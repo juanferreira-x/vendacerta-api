@@ -1,0 +1,33 @@
+# Sobe a API (perfil prod) + PostgreSQL com um comando:  docker compose up --build
+# Antes, copie .env.example para .env e troque a senha. O .env nunca vai para o git.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vendacerta}
+      POSTGRES_USER: ${POSTGRES_USER:-vendacerta}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-vendacerta}
+      DB_USERNAME: ${POSTGRES_USER:-vendacerta}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:

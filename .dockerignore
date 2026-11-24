@@ -1,0 +1,11 @@
+# Arquivos que NÃO entram na imagem Docker (menor, mais rápida e sem segredos)
+target/
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+.env
+.env.*
+docs/
+*.md
