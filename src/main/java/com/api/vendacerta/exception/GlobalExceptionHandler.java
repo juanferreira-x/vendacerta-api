@@ -1,7 +1,12 @@
 package com.api.vendacerta.exception;
 
+import java.time.Instant;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -12,9 +17,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.time.Instant;
-import java.util.List;
 
 /**
  * Tradutor central de erros: toda exceção vira uma resposta ProblemDetail (RFC 7807),
@@ -27,6 +29,7 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String TIMESTAMP_PROPERTY = "timestamp";
     private static final String ERRORS_PROPERTY = "errors";
 
@@ -47,14 +50,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Duas operações alteraram o mesmo registro ao mesmo tempo (lock otimista, campo {@code @Version})
+     * → 409. Nada foi salvo pela operação recusada, então o cliente pode simplesmente tentar de novo.
+     */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ProblemDetail handleConcurrentUpdate(OptimisticLockingFailureException ex) {
+        log.warn("Conflito de concorrência: {}", ex.getMessage());
+        return buildProblem(HttpStatus.CONFLICT, "error.concurrent-update.title", "error.concurrent-update.detail");
+    }
+
+    /**
+     * Rede de segurança para qualquer erro não previsto → 500 genérico.
+     * O detalhe técnico (classe, SQL, stack trace) vai só para o log do servidor e NUNCA para o
+     * cliente: expor isso ajudaria um atacante a entender o sistema por dentro.
+     */
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpected(Exception ex) {
+        log.error("Erro inesperado", ex);
+        return buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "error.unexpected.title", "error.unexpected.detail");
+    }
+
+    /**
      * Falha no {@code @Valid} → 400 com a lista de campos inválidos, para o cliente
      * destacar cada um no formulário. Sobrescreve só esta etapa da classe-pai
      * (Template Method); título e detalhe vêm do {@code messages.properties}.
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers,
-            HttpStatusCode status, WebRequest request) {
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         ProblemDetail problem = ex.updateAndGetBody(messageSource, LocaleContextHolder.getLocale());
 
@@ -80,16 +103,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return super.createResponseEntity(body, headers, statusCode, request);
     }
 
+    /** Erro de domínio: o detalhe vem da chave e dos argumentos guardados na própria exceção. */
+    private ProblemDetail buildProblem(HttpStatus status, String titleKey, LocalizedException ex) {
+        return problem(status, translate(titleKey), translate(ex.getMessageKey(), ex.getMessageArgs()));
+    }
+
+    /** Erro com texto fixo: título e detalhe são duas chaves do messages.properties. */
+    private ProblemDetail buildProblem(HttpStatus status, String titleKey, String detailKey) {
+        return problem(status, translate(titleKey), translate(detailKey));
+    }
+
     /**
-     * Monta o ProblemDetail de uma exceção de domínio, traduzindo a chave da mensagem.
      * Devolver ProblemDetail faz o Spring definir sozinho o status HTTP, o
      * Content-Type {@code application/problem+json} e o campo {@code instance}.
      */
-    private ProblemDetail buildProblem(HttpStatus status, String titleKey, LocalizedException ex) {
-        String detail = translate(ex.getMessageKey(), ex.getMessageArgs());
-
+    private ProblemDetail problem(HttpStatus status, String title, String detail) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail);
-        problem.setTitle(translate(titleKey));
+        problem.setTitle(title);
         problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         return problem;
     }
@@ -104,6 +134,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param field   caminho do campo no corpo da requisição (ex: {@code items[0].quantity})
      * @param message mensagem de validação já traduzida
      */
-    public record InvalidField(String field, String message) {
-    }
+    public record InvalidField(String field, String message) {}
 }

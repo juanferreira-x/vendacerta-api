@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.math.BigDecimal;
 
 /**
@@ -40,13 +39,20 @@ public class SaleItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    protected SaleItem() {
-    }
+    protected SaleItem() {}
 
     /**
      * Cria o item congelando o preço atual do produto como preço unitário.
+     *
+     * @throws IllegalArgumentException se o produto for nulo ou a quantidade não for positiva
      */
     public SaleItem(Product product, int quantity) {
+        if (product == null) {
+            throw new IllegalArgumentException("O produto do item é obrigatório.");
+        }
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("A quantidade do item deve ser positiva.");
+        }
         this.product = product;
         this.quantity = quantity;
         this.unitPrice = product.getPrice();
