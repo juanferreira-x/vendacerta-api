@@ -5,10 +5,9 @@ import com.api.vendacerta.dto.ProductResponseDto;
 import com.api.vendacerta.entity.Product;
 import com.api.vendacerta.exception.ResourceNotFoundException;
 import com.api.vendacerta.repository.ProductRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Regras de negócio de produtos.
@@ -27,7 +26,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto create(ProductRequestDto request) {
-        Product product = new Product(request.name(),request.price(), request.stockQuantity());
+        Product product = new Product(request.name(), request.price(), request.stockQuantity());
 
         Product savedProduct = productRepository.save(product);
         return ProductResponseDto.fromEntity(savedProduct);
@@ -53,7 +52,6 @@ public class ProductService {
      * @throws ResourceNotFoundException se nenhum produto tiver o id informado
      */
     public Product findEntityById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("product.not-found", id));
+        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("product.not-found", id));
     }
 }
