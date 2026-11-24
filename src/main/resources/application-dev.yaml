@@ -1,0 +1,22 @@
+# Perfil de desenvolvimento: banco H2 em memória (apagado a cada reinício),
+# console do H2 e Swagger liberados, e dados fictícios de demonstração.
+spring:
+  datasource:
+    url: jdbc:h2:mem:vendacerta;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+  flyway:
+    locations: classpath:db/migration,classpath:db/seed
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    com.api.vendacerta: DEBUG
