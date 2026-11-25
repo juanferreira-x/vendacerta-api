@@ -1,5 +1,10 @@
 # Dependabot: uma vez por semana, abre pull requests atualizando dependências desatualizadas
 # (Maven, GitHub Actions e imagens Docker). O CI testa cada PR antes de você decidir o merge.
+#
+# "commit-message.prefix" faz o robô usar "chore: ..." (sem o escopo entre parênteses).
+# O resto da frase ("bump X from A to B") é gerado pelo robô em inglês e não dá para traduzir:
+# por isso esses PRs são mesclados com "Squash and merge", reescrevendo a mensagem em português
+# (veja a seção 6 do CLAUDE.md).
 version: 2
 updates:
   - package-ecosystem: maven
@@ -7,13 +12,19 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: chore
 
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: chore
