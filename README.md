@@ -5,7 +5,10 @@
 
 🇧🇷 [Leia em português](README.pt-BR.md)
 
-Open-source REST API for a **single-store e-commerce**, built as a portfolio project.
+**Open-source online store platform for small Brazilian businesses, with Mercado Pago, ready to run with
+Docker.** Each installation is one store, customized by its owner, with no platform fees.
+
+This repository is the REST API, built as a portfolio project.
 Today it manages products and sales with transactional stock control; the roadmap adds a catalog,
 authentication, cart and orders, Mercado Pago payments, a storefront and an admin area.
 
@@ -46,7 +49,7 @@ Swagger, the H2 console and demo data are disabled in the `prod` profile.
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/api/v1/products` | Create a product (`201` + `Location`) |
-| `GET` | `/api/v1/products` | List products |
+| `GET` | `/api/v1/products` | List products, paginated: `?page=0&size=20&sort=price,desc` (max size 50; sort by `id`, `name` or `price`) |
 | `GET` | `/api/v1/products/{id}` | Get one product |
 | `POST` | `/api/v1/sales` | Register a sale and decrease stock (all or nothing) |
 

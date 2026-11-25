@@ -5,7 +5,10 @@
 
 🇺🇸 [Read in English](README.md)
 
-API REST open source para um **e-commerce de loja única**, feita como projeto de portfólio.
+**Plataforma de loja virtual open source para pequenos negócios brasileiros, com Mercado Pago, pronta para
+rodar com Docker.** Cada instalação é uma loja, personalizada pelo próprio lojista, sem mensalidade de plataforma.
+
+Este repositório é a API REST, feita como projeto de portfólio.
 Hoje ela gerencia produtos e vendas com controle transacional de estoque; o roadmap adiciona catálogo,
 autenticação, carrinho e pedidos, pagamentos com Mercado Pago, vitrine e área administrativa.
 
@@ -46,7 +49,7 @@ Swagger, console do H2 e dados de demonstração ficam desligados no perfil `pro
 | Método | Caminho | Descrição |
 |---|---|---|
 | `POST` | `/api/v1/products` | Cria um produto (`201` + `Location`) |
-| `GET` | `/api/v1/products` | Lista os produtos |
+| `GET` | `/api/v1/products` | Lista os produtos paginados: `?page=0&size=20&sort=price,desc` (tamanho máximo 50; ordenação por `id`, `name` ou `price`) |
 | `GET` | `/api/v1/products/{id}` | Busca um produto |
 | `POST` | `/api/v1/sales` | Registra uma venda e abate o estoque (tudo ou nada) |
 

@@ -1,9 +1,11 @@
 package com.api.vendacerta.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -12,14 +14,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.api.vendacerta.dto.PageResponseDto;
 import com.api.vendacerta.dto.ProductResponseDto;
+import com.api.vendacerta.exception.InvalidSortException;
 import com.api.vendacerta.exception.ResourceNotFoundException;
 import com.api.vendacerta.service.ProductService;
 import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -101,12 +108,55 @@ class ProductControllerTest {
     @Test
     @DisplayName("Erro inesperado devolve 500 genérico sem vazar detalhes internos")
     void shouldHideInternalDetailsOnUnexpectedError() throws Exception {
-        when(productService.findAll()).thenThrow(new IllegalStateException("SELECT * FROM products -- segredo"));
+        when(productService.findAll(any())).thenThrow(new IllegalStateException("SELECT * FROM products -- segredo"));
 
         mockMvc.perform(get(PRODUCTS_URL))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.title").value("Erro interno"))
                 .andExpect(jsonPath("$.trace").doesNotExist())
                 .andExpect(content().string(not(containsString("SELECT"))));
+    }
+
+    @Test
+    @DisplayName("Sem parâmetros, pede a página 0 com 20 itens ordenados por id")
+    void shouldUseDefaultPagination() throws Exception {
+        when(productService.findAll(any())).thenReturn(new PageResponseDto<>(List.of(), 0, 20, 0, 0));
+
+        mockMvc.perform(get(PRODUCTS_URL))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+
+        Pageable requested = capturePageable();
+        assertThat(requested.getPageNumber()).isZero();
+        assertThat(requested.getPageSize()).isEqualTo(20);
+        assertThat(requested.getSort().getOrderFor("id")).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Página gigante é limitada a 50 itens (proteção contra abuso)")
+    void shouldCapPageSizeAtFifty() throws Exception {
+        when(productService.findAll(any())).thenReturn(new PageResponseDto<>(List.of(), 0, 50, 0, 0));
+
+        mockMvc.perform(get(PRODUCTS_URL).param("size", "1000000")).andExpect(status().isOk());
+
+        assertThat(capturePageable().getPageSize()).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("Ordenação por campo não permitido devolve 400")
+    void shouldRejectUnknownSortField() throws Exception {
+        when(productService.findAll(any())).thenThrow(new InvalidSortException("version", List.of("id", "name")));
+
+        mockMvc.perform(get(PRODUCTS_URL).param("sort", "version,asc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Parâmetro inválido"))
+                .andExpect(jsonPath("$.detail")
+                        .value("Não é possível ordenar por 'version'. Campos permitidos: id, name."));
+    }
+
+    private Pageable capturePageable() {
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(productService).findAll(captor.capture());
+        return captor.getValue();
     }
 }

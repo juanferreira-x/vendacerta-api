@@ -1,11 +1,14 @@
 package com.api.vendacerta.controller;
 
+import com.api.vendacerta.dto.PageResponseDto;
 import com.api.vendacerta.dto.ProductRequestDto;
 import com.api.vendacerta.dto.ProductResponseDto;
 import com.api.vendacerta.service.ProductService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,9 +46,15 @@ public class ProductController {
         return ResponseEntity.created(location).body(createdProduct);
     }
 
+    /**
+     * Lista os produtos paginados: {@code ?page=0&size=20&sort=price,desc}.
+     * Sem parâmetros, devolve a primeira página com 20 itens ordenados por id.
+     * O tamanho máximo de página (50) é imposto pela configuração {@code spring.data.web.pageable}.
+     */
     @GetMapping
-    public ResponseEntity<List<ProductResponseDto>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<PageResponseDto<ProductResponseDto>> findAll(
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(productService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
