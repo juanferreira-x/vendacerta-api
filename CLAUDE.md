@@ -34,6 +34,13 @@ When you introduce an English identifier, say what it means in Portuguese. READM
 - Juan says most concepts are new to him: explain **very simply**, define every term, and walk through "what
   happens inside" step by step. His goal is to explain every decision perfectly in an interview, even without
   remembering each line of code.
+- **Pacing (Juan's request, 2026-11-25)**: too many new concepts at once made him lose track. Introduce **one
+  new concept per message**; explain it (what it is, analogy, problem it solves, what happens without it), then
+  **stop and ask 2–3 short questions** he answers in his own words before the next concept. Re-explain in a
+  different way if an answer is off. Writing code is fine (it is not about writing less): the goal is that he
+  understands the concept of everything, not that he memorizes code.
+- Juan keeps a **study notebook** in `docs/estudo/` (Portuguese, his own words), one entry per concept, used as
+  interview material. Suggest an entry after each new concept; review it kindly, never write it for him.
 
 ### 0.2 The loop for every step
 
@@ -88,6 +95,10 @@ Today only a small part of the API exists. The front end does not exist yet.
 
 ### Product decisions already made (do not reopen without asking Juan)
 
+- **Positioning** (decided 2026-11-25): "VendaCerta: open-source online store platform for small Brazilian
+  businesses, with Mercado Pago, ready to run with Docker." The niche is **who uses it** (the small Brazilian
+  merchant who wants their own store without platform fees), not a product segment. The name stays; the
+  fictional "Casa Aurora" is only the demo store.
 - **Goal**: portfolio piece, public on GitHub, genuinely usable by others. There is no real store or client.
 - **Model**: one deployment = one store (single-tenant). **No marketplace, no multi-vendor, no tenants, no
   billing.**
@@ -129,7 +140,6 @@ Today only a small part of the API exists. The front end does not exist yet.
 - Docker was not installed on Juan's machine when phase 1 was written: `docker compose` and the PostgreSQL
   test were not run locally yet (they run in CI).
 - No authentication, customers, cart, order status, images, price history or store settings.
-- `GET /products` returns everything (no pagination).
 - No `GET /sales/{id}`, so `POST /sales` returns `201` without `Location`.
 - The `api` service in `docker-compose.yml` has no healthcheck (the JRE image has no curl); only `db` has one.
 - The `prod` profile starts with an empty database (no demo data); decide later if a `demo` profile is needed.
@@ -480,7 +490,10 @@ Keep this short: one line per finished phase or milestone, newest last.
   coverage); security fixes (no stack trace/SQL leak, generic 500, H2 console dev-only, `@Size`/`@Digits`,
   entity guards); profiles dev/prod; PostgreSQL + Flyway; optimistic lock (409); Docker + compose; Actuator;
   OpenAPI; CI, CodeQL, Dependabot; Spotless; JaCoCo; demo seed; READMEs EN/PT, LICENSE, ADRs 0001–0002.
-- Next: Phase 2 (catalog), starting with pagination or product update/deactivation. Ask Juan.
+- 2026-11-25 — Dependabot commits in Juan's format, merged with squash in Portuguese (#29). Phase 2 started:
+  paginated `GET /products` with our `PageResponseDto`, default 20 / max 50, sort allowlist (`id`, `name`,
+  `price`) → 400 (#33). Positioning and new teaching pace recorded.
+- Next: Phase 2, product update + price history. Ask Juan.
 
 ---
 
