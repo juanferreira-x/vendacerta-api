@@ -314,6 +314,11 @@ ends have a stable contract to build on.
 - **Conventional Commits in Portuguese, Juan's format**: type **without scope parentheses**, capital letter after
   the colon (`feat: Adiciona ...`, `fix: Corrige ...`, `refactor:`, `test:`, `docs:`, `chore:`, `style:`,
   `ci:`). Small commits, one concern each. Link issues with `Resolve #N`.
+- **Dependabot PRs** (decided by Juan on 2026-11-25, applies to all future ones): the bot writes titles in
+  English (`chore: bump X from A to B`) and that cannot be translated. Juan merges them with **Squash and
+  merge**, rewriting the commit message in Portuguese, e.g. `chore: Atualiza actions/checkout da versao 5 para
+  a 7`, so `main` stays 100% Portuguese. Before merging: CI green, and for major versions check the release
+  notes for breaking changes. Prepare the exact `gh pr merge` command for him.
 - Never commit or push without Juan's explicit go (see 0.1). Never commit `.env`, keys or local config.
 
 ---
