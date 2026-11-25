@@ -49,6 +49,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildProblem(HttpStatus.UNPROCESSABLE_CONTENT, "error.insufficient-stock.title", ex);
     }
 
+    @ExceptionHandler(InvalidSortException.class)
+    public ProblemDetail handleInvalidSort(InvalidSortException ex) {
+        return buildProblem(HttpStatus.BAD_REQUEST, "error.invalid-parameter.title", ex);
+    }
+
     /**
      * Duas operações alteraram o mesmo registro ao mesmo tempo (lock otimista, campo {@code @Version})
      * → 409. Nada foi salvo pela operação recusada, então o cliente pode simplesmente tentar de novo.

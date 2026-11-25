@@ -18,6 +18,11 @@ spring:
   h2:
     console:
       enabled: false
+  data:
+    web:
+      pageable:
+        # Segurança: ninguém consegue pedir uma página gigante (ex: ?size=1000000); acima de 50, vira 50.
+        max-page-size: 50
 
 server:
   error:
